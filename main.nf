@@ -1,7 +1,7 @@
 params.genome = "s3://repeat-expansion/Reference/hs37d5.fa"
 params.bam = "s3://repeat-expansion/Bams/HG00457.mapped.ILLUMINA.bwa.CHS.exome.20121211.bam"
 params.bed= "s3://repeat-expansion/HipSTR/GRCh37.hipstr_reference.bed"
-params.depth = "25"
+params.minreads = "30"
 
 genome_file = file(params.genome)
 genome_index = file(params.genome+".fai")
@@ -18,7 +18,7 @@ process expansionhunter {
 	file('aln.bam.bai') from bai_file
 	file('genome.fa') from genome_file
 	file('genome.fa.fai') from genome_index
-	file('hipstr_reference.bed') from bed
+	file('hipstr_reference.bed') from bed_file
 	val(min) from min
 
 	output:
