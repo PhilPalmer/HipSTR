@@ -10,7 +10,7 @@ bai_file = file(params.bam+".bai")
 bed_file = file(params.bed)
 min = params.minreads
 
-process expansionhunter {
+process hipstr {
 	publishDir 'results'
 
 	input:
@@ -26,7 +26,7 @@ process expansionhunter {
 	
 	script:
 	"""
-	HipSTR
+	HipSTR \
 	--bams aln.bam \
 	--fasta genome.fa \
 	--regions hipstr_reference.bed \
