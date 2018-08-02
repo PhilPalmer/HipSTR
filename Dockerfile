@@ -7,7 +7,6 @@ LABEL \
 RUN apk update && apk add bash && apk add --no-cache --virtual .build-deps \
 	git build-base zlib-dev bzip2-dev xz-dev \
 	&& git clone https://github.com/HipSTR-Tool/HipSTR \
-	&& cd HipSTR && make && mv HipSTR /usr/local/bin/ \
-	&& apk del .build-deps
+	&& cd HipSTR && make && mv HipSTR /usr/local/bin/
 
 ENTRYPOINT ["HipSTR"]
