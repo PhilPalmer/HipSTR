@@ -5,9 +5,9 @@ NB: **Many of the inputs/flags in the original HipSTR documentation will not wor
 ## Example command that can be run over Deploit
 Example/test command that can be run on [Deploit](https://deploit.lifebit.ai/) using publically available test data. The data can be imported from the AWS S3 bucket [s3://lifebit-featured-datasets/](https://s3.console.aws.amazon.com/s3/buckets/lifebit-featured-datasets/pipelines/RepeatExpansion/?region=eu-west-1&tab=overview) 
 ```        
-nextflow run lifebit-ai/HipSTR --genome ExtensionRepeat/Reference/hs37d5.fa \
-                               --bam ExtensionRepeat/Bams/HG00472.mapped.ILLUMINA.bwa.CHS.exome.20121211.bam \
-                               --bed ExtensionRepeat/HipSTR/GRCh37.hipstr_reference.bed \
+nextflow run lifebit-ai/HipSTR --genome RepeatExpansion/Reference/hs37d5.fa \
+                               --bam RepeatExpansion/Bams/HG00472.mapped.ILLUMINA.bwa.CHS.exome.20121211.bam \
+                               --bed RepeatExpansion/HipSTR/GRCh37.hipstr_reference.bed \
                                --minreads 25
 ```
 
