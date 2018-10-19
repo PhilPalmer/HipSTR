@@ -3,9 +3,10 @@
 /*
  * SET UP CONFIGURATION VARIABLES
  */
-bam = Channel
-		.fromPath(params.bam)
-		.ifEmpty { exit 1, "${params.bam} not found.\nPlease specify --bam option (--bam bamfile)"}
+bam=file(params.bam)
+// bam = Channel
+// 		.fromPath(params.bam)
+// 		.ifEmpty { exit 1, "${params.bam} not found.\nPlease specify --bam option (--bam bamfile)"}
 
 // if(params.bai) {
 // 	bai = Channel
