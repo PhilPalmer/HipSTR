@@ -5,7 +5,7 @@
  */
 bam = Channel
 		.fromPath(params.bam)
-		.ifEmpty { exit 1, "${params.bam} not found.\nPlease specify --bam option (--bed bamfile)"}
+		.ifEmpty { exit 1, "${params.bam} not found.\nPlease specify --bam option (--bam bamfile)"}
 
 // if(params.bai) {
 // 	bai = Channel
@@ -28,7 +28,7 @@ bed = Channel
     .fromPath(params.bed)
     .ifEmpty { exit 1, "${params.bed} not found.\nPlease specify --bed option (--bed bedfile)"}
 
-		// Header log info
+// Header log info
 log.info """=======================================================
 		HipSTR
 ======================================================="""
