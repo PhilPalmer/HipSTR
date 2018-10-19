@@ -71,7 +71,10 @@ process preprocess_bam{
 }
 
 if(!params.fai) {
-  process preprocess_fai {
+  process preprocess_genome {
+
+			tag "${fasta}"
+			container 'lifebitai/preprocessingvctools'
 
       input:
       file fasta from fastaToFai
