@@ -1,40 +1,117 @@
-params.genome = "s3://repeat-expansion/Reference/hs37d5.fa"
-params.bam = "s3://repeat-expansion/Bams/HG00457.mapped.ILLUMINA.bwa.CHS.exome.20121211.bam"
-params.bed= "s3://repeat-expansion/HipSTR/GRCh37.hipstr_reference.bed"
-params.minreads = "30"
+#!/usr/bin/env nextflow
 
-genome_file = file(params.genome)
-genome_index = file(params.genome+".fai")
-bam_file = file(params.bam)
-bai_file = file(params.bam+".bai")
-bed_file = file(params.bed)
-min = params.minreads
+/*
+ * SET UP CONFIGURATION VARIABLES
+ */
+bam = Channel
+		.fromPath(params.bam)
+		.ifEmpty { exit 1, "${params.bam} not found.\nPlease specify --bam option (--bam bamfile)"}
+
+// if(params.bai) {
+// 	bai = Channel
+// 		.fromPath(params.bai)
+// 		.ifEmpty { exit 1, "${params.bai} not found.\nYou can remove your --bai option (--bai baifile) and it will be produced for you automatically"}
+// }
+
+Channel
+		.fromPath(params.genome)
+		.ifEmpty { exit 1, "${params.genome} not found.\nPlease specify --genome option (--genome fastafile)"}
+		.into { fastaToFai; fastaToHipSTR }
+
+if(params.fai) {
+	fai = Channel
+			.fromPath(params.fai)
+			.ifEmpty { exit 1, "${params.fai} not found.\nYou can remove your --fai option (--fai faifile) and it will be produced for you automatically"}
+}
+
+bed = Channel
+    .fromPath(params.bed)
+    .ifEmpty { exit 1, "${params.bed} not found.\nPlease specify --bed option (--bed bedfile)"}
+
+// Header log info
+log.info """=======================================================
+		HipSTR
+======================================================="""
+def summary = [:]
+summary['Pipeline Name']    = 'HipSTR'
+summary['Bam file']         = params.bam
+summary['Bed file']         = params.bed
+summary['Reference genome'] = params.genome
+if(params.fai) summary['Fasta Index'] = params.fai
+summary['Output dir']       = params.outdir
+summary['Working dir']      = workflow.workDir
+log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
+log.info "========================================="
+
+
+process preprocess_bam{
+
+  tag "${bam}"
+	container 'lifebitai/samtools'
+
+  input:
+  file bam from bam
+
+  output:
+  set file("ready/${bam}"), file("ready/${bam}.bai") into completeChannel
+
+  script:
+  """
+  mkdir ready
+  [[ `samtools view -H ${bam} | grep '@RG' | wc -l`   > 0 ]] && { mv $bam ready;}|| { java -jar /picard.jar AddOrReplaceReadGroups \
+  I=${bam} \
+  O=ready/${bam} \
+  RGID=${params.rgid} \
+  RGLB=${params.rglb} \
+  RGPL=${params.rgpl} \
+  RGPU=${params.rgpu} \
+  RGSM=${params.rgsm};}
+  cd ready ;samtools index ${bam};
+  """
+}
+
+if(!params.fai) {
+  process preprocess_genome {
+
+			tag "${fasta}"
+			container 'lifebitai/preprocessingvctools'
+
+      input:
+      file fasta from fastaToFai
+
+      output:
+      file("${fasta}.fai") into fai
+
+      script:
+      """
+      samtools faidx $fasta
+      """
+  }
+}
 
 process hipstr {
-	publishDir 'results'
+	container 'lifebitai/hipstr'
+
+	publishDir "${params.outdir}", mode: 'copy'
 
 	input:
-	file('aln.bam') from bam_file
-	file('aln.bam.bai') from bai_file
-	file('genome.fa') from genome_file
-	file('genome.fa.fai') from genome_index
-	file('hipstr_reference.bed') from bed_file
-	val(min) from min
+	set file(bam), file(bai) from completeChannel
+	file fasta from fastaToHipSTR
+	file fai from fai
+	file bed from bed
 
 	output:
 	file('output.*') into results
-	
+
 	script:
 	"""
 	HipSTR \
-	--bams aln.bam \
-	--fasta genome.fa \
-	--regions hipstr_reference.bed \
+	--bams ${bam} \
+	--fasta ${fasta} \
+	--regions ${bed} \
 	--str-vcf output.vcf.gz \
 	--log output.log \
 	--viz-out output.viz.gz \
-	--min-reads $min \
-	--def-stutter-model
 	"""
 }
 
