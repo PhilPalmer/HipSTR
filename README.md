@@ -3,17 +3,17 @@
 NB: **Many of the inputs/flags in the original HipSTR documentation will not work.** Instead use the paramters used in the example below. If any paramters from the original HipSTR documentation (which is included below the example) are required they can be implemented by modifying the main.nf script. For any queries about implementing more paramters you can email me at: phil@lifebit.ai.
 
 ## Example command that can be run over Deploit
-Example/test command that can be run on [Deploit](https://deploit.lifebit.ai/) using publically available test data. The data can be imported from the AWS S3 bucket [s3://lifebit-featured-datasets/](https://s3.console.aws.amazon.com/s3/buckets/lifebit-featured-datasets/pipelines/RepeatExpansion/?region=eu-west-1&tab=overview) 
+Example/test command that can be run on [Deploit](https://deploit.lifebit.ai/) using publically available test data. The data can be imported from the AWS S3 bucket [s3://lifebit-featured-datasets/](https://s3.console.aws.amazon.com/s3/buckets/lifebit-featured-datasets/pipelines/RepeatExpansion/?region=eu-west-1&tab=overview). The example paramters that are loaded as default look like this:
+![screen shot 2018-10-26 at 11 24 23](https://user-images.githubusercontent.com/32334279/47561586-9f004080-d913-11e8-9436-cbd7a197d80f.png)
 ```        
-nextflow run lifebit-ai/HipSTR --genome RepeatExpansion/Reference/hs37d5.fa \
-                               --bam RepeatExpansion/Bams/HG00472.mapped.ILLUMINA.bwa.CHS.exome.20121211.bam \
-                               --bed RepeatExpansion/HipSTR/GRCh37.hipstr_reference.bed \
-                               --minreads 25
+nextflow run lifebit-ai/HipSTR
+--genome lifebit-featured-datasets:pipelines/RepeatExpansion/Reference/hs37d5.fa
+--bam lifebit-featured-datasets:pipelines/RepeatExpansion/Bams/HG00472.mapped.ILLUMINA.bwa.CHS.exome.20121211.bam
+--bed lifebit-featured-datasets:pipelines/RepeatExpansion/HipSTR/GRCh37.hipstr_reference.bed
 ```
 
-* Please ensure the index file (.bam.bai) is located within the same folder. For example, for the test data the index file HG00472.mapped.ILLUMINA.bwa.CHS.exome.20121211.bam.bai is already located within RepeatExpansion/RepeatExpansion/Bams folder and so nothing more needs to be done.
-* **--minreads 25** was used as few samples were analyzed. This option will likely not be needed for analysing lots of samples (see original HipSTR documentation below)
-* **-def-stutter-model** is also used by default. This will likely need to be changed for analysing lots of samples
+* To run on your data you will need to replace the bam file with your own. You will then need to make sure that the `genome` option, which specifies the reference genome, is correct. For example, if running Genome in a Bottle data you may need to use either the GRCh37 or GRCh38 versions of the reference genome, depending on the specific data. Finally you must check that the bed file specifies the correct regions you want to analyse for your genome. Bed files can be made using the [Table Browser](http://genome.ucsc.edu/cgi-bin/hgTables?command=start) tool
+* The index files (.bam.bai and fasta.fai) are produced automatically for you and so nothing more needs to be done.
 *  **Warning** The execution time was 1hr on a m2.2xlarge (medium cost saving spot instance)
 * The output should be found in the format of output.vcf.gz, log output.log and output.viz.gz (these are gzipped/compressed files and so with need to be extracted to be viewed)
 
