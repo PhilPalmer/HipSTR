@@ -3,6 +3,8 @@
 /*
  * SET UP CONFIGURATION VARIABLES
  */
+minreads = params.minreads
+ 
 bam = Channel
 		.fromPath(params.bam)
 		.ifEmpty { exit 1, "${params.bam} not found.\nPlease specify --bam option (--bam bamfile)"}
@@ -109,6 +111,7 @@ process hipstr {
 	--bams ${bam} \
 	--fasta ${fasta} \
 	--regions ${bed} \
+	--min-reads ${minreads} \
 	--str-vcf output.vcf.gz \
 	--log output.log \
 	--viz-out output.viz.gz \
