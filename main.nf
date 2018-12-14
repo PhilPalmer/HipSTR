@@ -3,6 +3,8 @@
 /*
  * SET UP CONFIGURATION VARIABLES
  */
+minreads = params.minreads
+ 
 bam = Channel
 		.fromPath(params.bam)
 		.ifEmpty { exit 1, "${params.bam} not found.\nPlease specify --bam option (--bam bamfile)"}
@@ -58,7 +60,7 @@ process preprocess_bam{
   script:
   """
   mkdir ready
-  [[ `samtools view -H ${bam} | grep '@RG' | wc -l`   > 0 ]] && { mv $bam ready;}|| { java -jar /picard.jar AddOrReplaceReadGroups \
+  [[ `samtools view -H ${bam} | grep '@RG' | wc -l`   > 0 ]] && { mv $bam ready;}|| { picard AddOrReplaceReadGroups \
   I=${bam} \
   O=ready/${bam} \
   RGID=${params.rgid} \
@@ -109,6 +111,7 @@ process hipstr {
 	--bams ${bam} \
 	--fasta ${fasta} \
 	--regions ${bed} \
+	--min-reads ${minreads} \
 	--str-vcf output.vcf.gz \
 	--log output.log \
 	--viz-out output.viz.gz \
