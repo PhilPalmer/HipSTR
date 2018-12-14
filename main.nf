@@ -4,7 +4,7 @@
  * SET UP CONFIGURATION VARIABLES
  */
 minreads = params.minreads
- 
+
 bam = Channel
 		.fromPath(params.bam)
 		.ifEmpty { exit 1, "${params.bam} not found.\nPlease specify --bam option (--bam bamfile)"}
@@ -104,6 +104,7 @@ process hipstr {
 
 	output:
 	file('output.*') into results
+  file(".vcf") into vcf
 
 	script:
 	"""
@@ -116,6 +117,31 @@ process hipstr {
 	--log output.log \
 	--viz-out output.viz.gz \
 	"""
+}
+
+process vcf_plot {
+    tag "$vcf"
+    publishDir 'results'
+    container 'lifebitai/vcfr:latest'
+
+    when:
+    !params.skip_plot_vcf
+
+    input:
+    file vcf from vcf
+
+    output:
+    file 'Rplots.pdf' into plot
+
+    script:
+    """
+    #!/usr/bin/env Rscript
+ 		library(vcfR)
+    vcf_file <- "${vcf}"
+    vcf <- read.vcfR(vcf_file, verbose = FALSE)
+    plot(vcf)
+    dev.off()
+    """
 }
 
 workflow.onComplete {
